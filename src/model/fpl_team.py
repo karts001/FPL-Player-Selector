@@ -17,7 +17,6 @@ class FPLTeam():
         self.team = []
         self.star_players = star_players
         self.team_tracker = {}
-        self.average_player_cost = self.calculate_new_average_player_cost()
                     
     def validate_player(self, full_name, cost, team, position):
         
@@ -41,11 +40,6 @@ class FPLTeam():
         self.increment_team_tracker(player_team)
         self.decrement_star_players(cost)
         self.get_player_count()
-        self.calculate_new_average_player_cost()
-    
-    def calculate_new_average_player_cost(self):
-        
-        return self.budget / (NUMBER_OF_PLAYERS_IN_SQUAD - self.player_count)
     
     def validate_budget(self, player_cost, player_name):
         if (self.budget - player_cost) < 0:
