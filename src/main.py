@@ -158,11 +158,5 @@ def drop_players_who_are_not_in_the_league_anymore(df):
     """
     df = df.drop(["Ivan Toney"])
     return df            
-   
-def get_base_response_data():
-	response = requests.get(base_url)
-	data = response.json()
-	
-	return data
 
 select_initial_squad(3)
