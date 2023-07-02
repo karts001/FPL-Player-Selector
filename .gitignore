@@ -147,7 +147,7 @@ cython_debug/
 flask_app/secrets.env
 
 src/data
-src/my_fpl_team.txt
+my_fpl_team.txt
 
 # PyCharm
 #  JetBrains specific template is maintainted in a separate JetBrains.gitignore that can

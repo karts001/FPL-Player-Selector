@@ -1,6 +1,11 @@
 """ Create an FPL class which contains all the rules of the FPL team """
 
 NUMBER_OF_PLAYERS_IN_SQUAD = 15
+NUMBER_OF_GOAL_KEEPERS_IN_SQUAD = 2
+NUMBER_OF_GSDEFENDER_IN_SQUAD = 5
+NUMBER_OF_MIDFIELDERS_IN_SQUAD = 5
+NUMBER_OF_ATTACKERS_IN_SQUAD = 5
+
 
 class FPLTeam():
     def __init__(self, star_players):
