@@ -1,115 +1,65 @@
 """ Create an FPL class which contains all the rules of the FPL team """
 
+from abc import ABC, abstractmethod
+
 NUMBER_OF_PLAYERS_IN_SQUAD = 15
 NUMBER_OF_GOAL_KEEPERS_IN_SQUAD = 2
 NUMBER_OF_GSDEFENDER_IN_SQUAD = 5
 NUMBER_OF_MIDFIELDERS_IN_SQUAD = 5
 NUMBER_OF_ATTACKERS_IN_SQUAD = 5
 
+team_tracker = {}
 
-class FPLTeam():
-    def __init__(self, star_players):
+class BaseFPL(ABC):
+    def __init__(self):
+        self.players = []
         self.player_count = 0
-        self.number_of_goal_keeper_in_squad = 2
-        self.number_of_defenders_in_squad = 5
-        self.number_of_midfielders_in_squad = 5
-        self.number_of_attackers_in_squad = 3
-        self.goalkeeper_count = 0
-        self.defender_count = 0
-        self.midfield_count = 0
-        self.attack_count = 0
-        self.budget = 100
-        self.team = []
-        self.star_players = star_players
-        self.team_tracker = {}
-                    
-    def validate_player(self, full_name, cost, team, position):
-        
-        if self.star_players == 0 and cost > 8.0:
-            return False
-        
-        in_budget = self.validate_budget(cost, full_name)
-        position_limit = self.validate_squad_position(position)
-        team_limit = self.validate_team_tracker(team)
-
-        if in_budget and position_limit and team_limit:
-            return True
-        else:
-            return False
     
-    def add_player(self, cost, position, full_name, player_team):
+    @property
+    @abstractmethod
+    def min_no_of_players(self):
+        pass
         
-        self.team.append(full_name)
+    @abstractmethod
+    def validate_player(self, full_name, cost, team):
+        pass
+    
+    @abstractmethod
+    def decrement_star_players(self, cost):
+        pass
+    
+    def add_player(self, full_name, cost, team):
+        self.players.append(full_name)
         self.budget -= cost
-        self.increment_player_position_count(position)
-        self.increment_team_tracker(player_team)
         self.decrement_star_players(cost)
-        self.get_player_count()
+        self.increment_team_tracker(team)
+        self.player_count = self.get_player_count()
     
-    def validate_budget(self, player_cost, player_name):
+    def validate_budget(self, player_cost, player_name, budget):
         if (self.budget - player_cost) < 0:
-            # remove previous player
-            print(f"Invalid funds for this {player_name}. He costs {player_cost}, the remaining budget is {self.budget}")
+            print(f"Invalid funds for this {player_name}. He costs {player_cost}, the remaining budget is {budget}")
             return False
         else:
             return True
-
-    def validate_squad_position(self, position):
-
-        if position == 1 and self.goalkeeper_count == self.number_of_goal_keeper_in_squad:
-            print("Already 2 goal keepers in the squad")
-            return False
-            
-        elif position == 2 and self.defender_count == self.number_of_defenders_in_squad:
-            print("Already 5 defenders in the squad")
-            return False
-            
-        
-        elif position == 3 and self.midfield_count == self.number_of_midfielders_in_squad:
-            print("Already 5 midfielders in the squad")
-            return False
-            
-        elif position == 4 and self.attack_count == self.number_of_attackers_in_squad:
-            print("Already 3 attackers in the squad")
-            return False
-        
-        else:
-            return True
-
+    
     def validate_team_tracker(self, team):
-        
-        is_team_in_tracker = self.team_tracker.get(team, None)
+        is_team_in_tracker = team_tracker.get(team, None)
         if is_team_in_tracker == None:
             return True
         elif is_team_in_tracker == 3:
             return False
         else:
             return True
-        
-    def decrement_star_players(self, cost):
-        if cost > 8.0:
-            self.star_players -= 1
-        
-    def increment_player_position_count(self, position):
-        if position == 1:
-            self.goalkeeper_count += 1
-        elif position == 2:
-            self.defender_count += 1
-        elif position == 3:
-            self.midfield_count += 1
-        elif position == 4:
-            self.attack_count += 1    
-            
-    def get_player_count(self):
-        self.player_count = len(self.team)
-        
+    
     def increment_team_tracker(self, team_id):
-        team = self.team_tracker.get(team_id, None)
+        team = team_tracker.get(team_id, None)
         
         if team == None:
             # add new team to dictionary
-            self.team_tracker[team_id] = 1
+            team_tracker[team_id] = 1
         else:
-            self.team_tracker[team_id] += 1
-           
-       
+            team_tracker[team_id] += 1
+            
+    def get_player_count(self):
+        return len(self.players) 
+   

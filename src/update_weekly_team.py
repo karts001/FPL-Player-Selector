@@ -2,6 +2,9 @@ import requests
 from dotenv import load_dotenv
 import os
 from collections import namedtuple
+import pandas as pd
+
+from build_initial_squad import get_player_data_from_api
 
 load_dotenv()
 PL_ODDS_API_KEY = os.getenv("PL_ODDS_API_KEY")
@@ -66,3 +69,8 @@ def add_probabilities_to_list(match_outcome: dict) -> list[team_probability]:
     odds_list.append((home_team, away_team))
     
     return odds_list
+
+def get_this_season_ROI():
+    player_data = get_player_data_from_api()
+    df_api = pd.DataFrame.from_dict(player_data)
+    
