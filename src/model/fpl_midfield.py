@@ -5,7 +5,7 @@ class FPLMidfield(BaseFPL):
         super().__init__()
         self.star_players = star_players
         self.number_of_midfielders_count = 5
-        self.star_player_price = 7.0
+        self.star_player_price = 8.0
         self.budget = budget
         
     def min_no_of_players(self):

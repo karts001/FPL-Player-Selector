@@ -14,11 +14,9 @@ BUDGET = 100
 
 base_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 player_data_22_23_file = "players_raw_22_23.csv"
-sort_by_FPL_metric_csv = "sort_by_FPL_metric.csv"
 
 current_dir = dirname(__file__)
-player_data_file_path = join(current_dir, "data", player_data_22_23_file)
-fpl_metric_csv = join(current_dir, "data", sort_by_FPL_metric_csv)
+player_data_file_path = join(current_dir, "csv_files", player_data_22_23_file)
 
     
 def select_initial_squad():
