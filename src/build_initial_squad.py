@@ -13,7 +13,7 @@ MINIMUM_NUMBER_OF_MINUTES_PLAYED = 1500
 SQUAD_SIZE = 15
 BUDGET = 100
 
-player_data_22_23_file = "filtered_players.csv"
+player_data_22_23_file = "players_raw_22_23.csv"
 current_dir = dirname(__file__)
 player_data_file_path = join(current_dir, "csv_files", player_data_22_23_file)
 
@@ -59,7 +59,7 @@ def read_csv_create_full_name_header_and_add_player_price_data_from_api(file_pat
     df = pd.read_csv(file_path)
     df = create_full_name_column_and_make_it_the_row_index(df)
     now_cost_column, element_type_column = create_now_cost_series_from_api(df)
-    # df = drop_and_replace_now_cost_column(now_cost_column, element_type_column, df)
+    df = drop_and_replace_now_cost_column(now_cost_column, element_type_column, df)
 
     return df
 
@@ -73,6 +73,7 @@ def create_full_name_column_and_make_it_the_row_index(df: pd.DataFrame):
       df (pd.df_attackers) : Updated pandas df_attackers
     """
     df["Full Name"] = df["first_name"] + " " + df["second_name"]
+    df["Element"] = df.index
     df = df.set_index("Full Name")
     
     return df
@@ -121,7 +122,7 @@ def drop_players_who_dont_meet_playtime_requirements(df: pd.DataFrame):
     Returns:
         df (pd.df_attackers) : Updated pandas df_attackers
     """
-    df.drop(df[(df["minutes"] <= 1500) | (df["starts_per_90"] <= 1)].index, inplace=True)
+    df.drop(df[(df["minutes"] <= 1500) | (df["starts_per_90"] <= 0.9)].index, inplace=True)
     df["ROI"] = (df["points_per_game"].astype(float)) / df["now_cost"]
     df["FPL_Metric"] = df["ROI"] * (df["total_points"])
 
@@ -164,7 +165,7 @@ def calculate_player_ROI_and_shortlist_best_players_based_on_ROI(df: pd.DataFram
 
 def split_data_by_position(position, df):
     df_position_specific = df.drop(df[(df["element_type"] != position)].index)
-    df_columns_filtered = df_position_specific.filter(["total_points", "points_per_game", "now_cost", "starts_per_90", "element_type", "team", "form", "FPL_Metric"], axis=1)
+    df_columns_filtered = df_position_specific.filter(["total_points", "points_per_game", "now_cost", "starts_per_90", "element_type", "team", "form", "FPL_Metric", "element"], axis=1)
     df_columns_filtered.sort_values(by=["FPL_Metric"], inplace=True, ascending=False)
     
     return df_columns_filtered

@@ -4,7 +4,6 @@ import os
 from collections import namedtuple
 import pandas as pd
 
-from build_initial_squad import get_player_data_from_api
 from common.team_conversion import string_to_int_map
 
 load_dotenv()
@@ -12,13 +11,12 @@ PL_ODDS_API_KEY = os.getenv("PL_ODDS_API_KEY")
 sport = "soccer_epl"
 region = "uk"
 odds_dict = {}
-team_win_probability = namedtuple("team_win_probability", ["team_name", "probabilities", "average_probability"])
 
 class TeamProbabilities:
     def __init__(self, team_name):
         self.team_name = team_name
         self.probabilities = []
-        self.average_probability = 0
+        self.average_probabilities = 0
         
     def calculate_average_probabilities(self):
         if len(self.probabilities) != 0:
@@ -108,8 +106,8 @@ def add_probabilities_to_dict(match_outcome: dict) -> dict:
     else:
         odds_dict.get(away_team_name).probabilities.append(away_probability)
 
-    home_team.average_probability = home_team.calculate_average_probabilities()
-    away_team.average_probability = away_team.calculate_average_probabilities()
+    odds_dict.get(home_team_name).average_probabilities = odds_dict.get(home_team_name).calculate_average_probabilities()
+    odds_dict.get(away_team_name).average_probabilities = odds_dict.get(away_team_name).calculate_average_probabilities()
     return odds_dict
 
 def get_probability_average(list_of_win_probabilities: list) -> int:

@@ -149,6 +149,8 @@ flask_app/secrets.env
 src/data
 my_fpl_team.txt
 
+player_weekly_score.csv
+
 # PyCharm
 #  JetBrains specific template is maintainted in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
