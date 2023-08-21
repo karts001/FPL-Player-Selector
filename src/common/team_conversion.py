@@ -54,7 +54,7 @@ squad_element_map = {
     14: "Martin Ødegaard",
     226: "Eberechi Eze",
     134: "Pascal Groß",
-    402: "Miguel Almirón Rejala",
+    365: "Rodrigo Hernandez",
     373: "Bruno Borges Fernandes",
     278: "Aleksandar Mitrović",
     355: "Erling Haaland",

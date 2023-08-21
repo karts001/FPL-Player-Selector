@@ -104,21 +104,4 @@ def get_remaining_balance() -> int:
     transfers = response["transfers"]
     balance = transfers.get("bank")
     
-    return balance
-
-# def get_current_gameweek():
-    
-#     response = get_base_response()
-#     events = response["events"]
-#     # check if current date is before deadline
-#     # if it is break out of loop and take the gameweek
-#     today = datetime.now()
-#     iso_date = today.isoformat()
-    
-#     for gameweek_data in events:
-#         deadline = gameweek_data["deadline_time"]
-#         if iso_date > deadline:
-#            continue
-#         else:
-#             current_gameweek = gameweek_data["id"]
-#             return current_gameweek
+    return balance / 10

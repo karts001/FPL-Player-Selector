@@ -1,65 +1,59 @@
-""" Create an FPL class which contains all the rules of the FPL team """
+"""FPL team class"""
 
-from abc import ABC, abstractmethod
+# In starting 11 there must be:
+# 1 Goal keeper
+# Min 3 defenders
+# Min 1 striker
+# 11 players total
 
-NUMBER_OF_PLAYERS_IN_SQUAD = 15
-NUMBER_OF_GOAL_KEEPERS_IN_SQUAD = 2
-NUMBER_OF_GSDEFENDER_IN_SQUAD = 5
-NUMBER_OF_MIDFIELDERS_IN_SQUAD = 5
-NUMBER_OF_ATTACKERS_IN_SQUAD = 5
-
-team_tracker = {}
-
-class BaseFPL(ABC):
+class FPLTeam:
     def __init__(self):
-        self.players = []
-        self.player_count = 0
-    
-    @property
-    @abstractmethod
-    def min_no_of_players(self):
-        pass
+        self.team_score = 0
+        self.team = []
+        self.bench = []
+        self.goalkeeper = 0
+        self.defenders = 0
+        self.midfielders = 0
+        self.attackers = 0
+        self.validation_tracker = {}
         
-    @abstractmethod
-    def validate_player(self, full_name, cost, team):
-        pass
-    
-    @abstractmethod
-    def decrement_star_players(self, cost):
-        pass
-    
-    def add_player(self, full_name, cost, team):
-        self.players.append(full_name)
-        self.budget -= cost
-        self.decrement_star_players(cost)
-        self.increment_team_tracker(team)
-        self.player_count = self.get_player_count()
-    
-    def validate_budget(self, player_cost, player_name, budget):
-        if (self.budget - player_cost) < 0:
-            print(f"Invalid funds for this {player_name}. He costs {player_cost}, the remaining budget is {budget}")
-            return False
-        else:
+    def validate_team(self):
+        if self.validate_goalkeeper() and self.validate_defenders() and self.validate_attackers():
             return True
-    
-    def validate_team_tracker(self, team):
-        is_team_in_tracker = team_tracker.get(team, None)
-        if is_team_in_tracker == None:
-            return True
-        elif is_team_in_tracker == 3:
-            return False
         else:
-            return True
-    
-    def increment_team_tracker(self, team_id):
-        team = team_tracker.get(team_id, None)
-        
-        if team == None:
-            # add new team to dictionary
-            team_tracker[team_id] = 1
-        else:
-            team_tracker[team_id] += 1
+            self.validation_tracker.update({
+                "goalkeeper": self.validate_goalkeeper(),
+                "defenders": self.validate_defenders(),
+                "attackers": self.validate_attackers()
+            })
             
-    def get_player_count(self):
-        return len(self.players) 
-   
+            return False
+            
+    
+    def validate_goalkeeper(self):
+        if self.goalkeeper != 1:
+            return False
+        else:
+            return True
+        
+    def validate_defenders(self):
+        if self.defenders < 3:
+            return False
+        else:
+            return True
+        
+    def validate_attackers(self):
+        if self.attackers < 1:
+            return False
+        else:
+            return True
+    
+    def increment_position_counter(self, element):
+        if element == 1:
+            self.goalkeeper += 1
+        if element == 2:
+            self.defenders += 1
+        if element == 3:
+            self.midfielders += 1
+        if element == 4:
+            self.attackers += 1

@@ -1,5 +1,8 @@
-from build_initial_squad import select_initial_squad
+from fastapi import FastAPI
+from current_team import *
+app = FastAPI()
 
-if __name__ == "__main__":
-    select_initial_squad()
+@app.get("/")
+def root():
+    return {"message": "Hello World"}
     

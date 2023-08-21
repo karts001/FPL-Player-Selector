@@ -150,6 +150,7 @@ src/data
 my_fpl_team.txt
 
 player_weekly_score.csv
+src/common/team_conversion.py
 
 # PyCharm
 #  JetBrains specific template is maintainted in a separate JetBrains.gitignore that can
