@@ -1,8 +1,10 @@
 from fastapi import FastAPI
-from current_team import *
+from src.weekly_calculation.current_team import rank_current_squad
+
 app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    potential_transfers = rank_current_squad()
+    return potential_transfers
     

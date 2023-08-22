@@ -4,11 +4,11 @@ import requests
 from collections import namedtuple
 from operator import attrgetter
 
-import common.fpl_get_endpoint as fpl
-import common.pandas_methods as pdm
-import common.team_conversion as tc
-import file_paths as fp
-from model.fpl_team import FPLTeam
+import src.common.fpl_get_endpoint as fpl
+import src.common.pandas_methods as pdm
+import src.common.team_conversion as tc
+import src.file_paths as fp
+from src.model.fpl_team import FPLTeam
 
 current_gameweek_data_endpoint = f"https://fantasy.premierleague.com/api/event/{fpl.get_current_gameweek()}/live/"
 
@@ -25,10 +25,10 @@ def rank_current_squad():
     midfielder = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 3)
     attacker = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 4)
     
-    print(goalkeeper)
-    print(defender)
-    print(midfielder)
-    print(attacker)
+    PotentialTransfers = namedtuple("PotentialTransfers", ["goalkeeper", "defender", "midfielder", "attacker"])
+    potential_transfers = PotentialTransfers(goalkeeper, defender, midfielder, attacker)
+    
+    return potential_transfers
     
     
 
@@ -112,8 +112,6 @@ def add_player_data_to_fpl_team_class(fpl_team, PlayerData, row):
         fpl_team.team_score += row._26
         fpl_team.team.append(player_data)
         fpl_team.increment_position_counter(row.element_type)
-
-# GO through the player_weekly_score dataframe and find the highest rated player who isn't in my team and see if they can be added into my team
     
 def get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, position):
     position_data = req_data.loc[req_data["element_type"] == position]
@@ -145,4 +143,4 @@ def get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_da
             
     
             
-rank_current_squad() 
+print(rank_current_squad() )
