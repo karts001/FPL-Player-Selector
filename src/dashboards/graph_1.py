@@ -18,20 +18,20 @@ app.layout = html.Div([
         options=[
             {"label": "Goalkeeper", "value": 1},
             {"label": "Defender", "value": 2},
-            {"label": "Midfielder", "value": 2},
+            {"label": "Midfielder", "value": 3},
             {"label": "Attacker", "value": 4}],
             value=4,
             id="dropdown-selection"),
     dcc.Graph(id="graph-content"),
 ])
 
-@callback(
+@app.callback(
     Output("graph-content", "figure"),
     Input("dropdown-selection", "value")
 )
 def create_graph(value):
     dff = df[df.element_type==value]
-    scatter_graph = px.scatter(dff, y="X-Rating", x="FPL Weekly Score", color="element_type", hover_name="Full Name", size="X-Rating")
+    scatter_graph = px.scatter(dff, y="X-Rating", x="FPL Weekly Score", color="element_type", hover_name="Full Name")
     return scatter_graph
 
     

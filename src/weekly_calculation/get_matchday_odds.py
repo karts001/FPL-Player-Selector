@@ -1,10 +1,8 @@
 import requests
 from dotenv import load_dotenv
 import os
-from collections import namedtuple
-import pandas as pd
 
-from common.team_conversion import string_to_int_map
+from src.common.team_conversion import string_to_int_map
 
 load_dotenv()
 PL_ODDS_API_KEY = os.getenv("PL_ODDS_API_KEY")

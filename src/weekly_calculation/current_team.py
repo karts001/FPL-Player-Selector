@@ -18,7 +18,7 @@ def rank_current_squad():
     list_of_player_ids = create_a_list_of_squad_ids()
     req_data = trim_df_columns()
     squad_data = get_squad_player_data(list_of_player_ids)
-    df = convert_squad_data_lsit_into_df(squad_data, req_data)
+    df = convert_squad_data_list_into_df(squad_data, req_data)
     fpl_team = select_and_validate_team_from_squad(df)
     goalkeeper = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 1)
     defender = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 2)
@@ -55,7 +55,7 @@ def get_squad_player_data(list_of_player_ids):
     return squad_data
 
 # Clean the data and put it in a pandas dataframe
-def convert_squad_data_lsit_into_df(squad_data, req_data):
+def convert_squad_data_list_into_df(squad_data, req_data):
     
     df = pdm.convert_squad_data_into_a_dataframe(squad_data)
     df["Full Name"] = df["id"].map(tc.squad_element_map)
@@ -140,7 +140,3 @@ def get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_da
                     else:
                         # can't afford player
                         continue
-            
-    
-            
-print(rank_current_squad() )

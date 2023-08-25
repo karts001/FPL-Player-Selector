@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 from os.path import dirname, join
 
-from common.team_conversion import string_to_int_map
-from common.fpl_get_endpoint import get_player_data_from_api
-import common.pandas_methods as pdm
-import file_paths as fp
-from get_matchday_odds import get_matchday_odds
+from src.common.team_conversion import string_to_int_map
+from src.common.fpl_get_endpoint import get_player_data_from_api
+import src.common.pandas_methods as pdm
+import src.file_paths as fp
+from src.weekly_calculation.get_matchday_odds import get_matchday_odds
 
 
 def create_separate_columns_from_team_probability_class(team_probability):
@@ -53,7 +53,10 @@ df_fpl = pd.concat([df_fpl, new_columns_df], axis=1)
 df_fpl["One Match Probability"] = df_fpl.Probabilities.apply(lambda x: x[0])
 df_fpl = pdm.convert_column_to_float(df_fpl, "form")
 df_fpl = pdm.convert_column_to_float(df_fpl, "ict_index")
-df_fpl["FPL Weekly Score"] = ((0.1 * df_fpl["form"]) + (2 * df_fpl["One Match Probability"]) + (1.5 * df_fpl["Average Probability"]) + (0.1 * df_fpl["ict_index"]) + (0.01 * df_fpl["FPL_Metric"]))
+df_fpl["chance_of_playing_this_round"] = df_fpl["chance_of_playing_this_round"].fillna(100.0)
+
+df_fpl["FPL Weekly Score"] = ((0.1 * df_fpl["form"]) + (2 * df_fpl["One Match Probability"]) + (1.5 * df_fpl["Average Probability"]) + (0.1 * df_fpl["ict_index"]) + (0.01 * df_fpl["FPL_Metric"]) + ((df_fpl["chance_of_playing_this_round"]/100) -1) )
+df_fpl.drop(df_fpl[df_fpl["FPL Weekly Score"] < 0].index, inplace=True)
 
 try:
     df_fpl.drop(df[(df["chance_of_playing_next_round"]) <= 50.0].index, inplace=True)
@@ -65,4 +68,4 @@ df_fpl["chance_of_playing_this_round"] = df_fpl["chance_of_playing_this_round"].
 df_fpl.sort_values(by="FPL Weekly Score", ascending=False, inplace=True)
 df_fpl["rank"] = np.arange(df_fpl.shape[0]) + 1
 
-df_fpl.to_csv("src/player_weekly_score.csv")
+df_fpl.to_csv("../player_weekly_score.csv")

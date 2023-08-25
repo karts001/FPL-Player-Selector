@@ -56,7 +56,7 @@ squad_element_map = {
     134: "Pascal Groß",
     365: "Rodrigo Hernandez",
     373: "Bruno Borges Fernandes",
-    278: "Aleksandar Mitrović",
+    343: "Julián Álvarez",
     355: "Erling Haaland",
     533: "Lukasz Fabianski",
     405: "Sven Botman",

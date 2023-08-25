@@ -3,10 +3,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 
-load_dotenv()
-
-
-
+load_dotenv(override=True)
 base_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 manager_id = "5701404"
 manager_base_url = f"https://fantasy.premierleague.com/api/entry/{manager_id}"
@@ -17,7 +14,7 @@ password = os.getenv("FPL_PASSWORD")
 login = os.getenv("FPL_LOGIN")
 cookie = os.getenv("FPL_SESSION_COOKIE")
 
-string = """pl_profile=eyJzIjogIld6SXNNemt3TVRneU9UaGQ6MXFVTjRYOldHRG9sM2hxTGowNkVGb1ZuSkdQYl9TVmduem5VZ1lfQ2IwVkY0VE1TNzgiLCAidSI6IHsiaWQiOiAzOTAxODI5OCwgImZuIjogIlNoaXZhIiwgImxuIjogIkthcnRoaWtleWFuIiwgImZjIjogMTR9fQ=="""
+string = f"""pl_profile={cookie}"""
 
 headers = {
         "cookie": string
@@ -35,12 +32,7 @@ def get_manager_response():
     response = response.json()
     return response
 
-def get_my_team():
-    # session = authenticate_login()
-    # headers = {
-    #     "cookie": string
-    # }
-    
+def get_my_team():    
     response = requests.get(my_team_endpoint, headers=headers)
     response = response.json()
     
