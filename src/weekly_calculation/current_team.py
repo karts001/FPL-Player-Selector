@@ -10,6 +10,7 @@ import src.common.team_conversion as tc
 import src.file_paths as fp
 from src.model.fpl_team import FPLTeam
 
+
 current_gameweek_data_endpoint = f"https://fantasy.premierleague.com/api/event/{fpl.get_current_gameweek()}/live/"
 
 """Create a dataframe which contains my team and their fpl weekly score"""
@@ -19,7 +20,9 @@ def rank_current_squad():
     req_data = trim_df_columns()
     squad_data = get_squad_player_data(list_of_player_ids)
     df = convert_squad_data_list_into_df(squad_data, req_data)
+    team_frequency = count_number_of_players_from_same_team(df)
     fpl_team = select_and_validate_team_from_squad(df)
+    
     goalkeeper = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 1)
     defender = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 2)
     midfielder = get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, 3)
@@ -29,7 +32,6 @@ def rank_current_squad():
     potential_transfers = PotentialTransfers(goalkeeper, defender, midfielder, attacker)
     
     return potential_transfers
-    
     
 
 # List of player's element number
@@ -42,7 +44,7 @@ def trim_df_columns():
     file_path = fp.get_player_weekly_score_csv_path()
     df_player_score = pdm.convert_data_to_dataframe(file_path)
     df_player_score = df_player_score.set_index("Full Name")
-    req_data = df_player_score.loc[:, ["FPL Weekly Score", "rank", "element_type", "chance_of_playing_this_round", "now_cost"]]
+    req_data = df_player_score.loc[:, ["FPL Weekly Score", "rank", "element_type", "chance_of_playing_this_round", "now_cost", "team"]]
     
     return req_data
 
@@ -68,9 +70,15 @@ def convert_squad_data_list_into_df(squad_data, req_data):
     
     return df
 
+def count_number_of_players_from_same_team(df):
+    team_frequency = df["team"].value_counts()
+    team_frequency.loc
+    
+    return team_frequency
+
 def select_and_validate_team_from_squad(df):
     fpl_team = FPLTeam()
-    PlayerData = namedtuple("PlayerData", ["id", "rank", "name", "element_type", "score", "cost"])
+    PlayerData = namedtuple("PlayerData", ["id", "rank", "name", "element_type", "score", "cost", "team"])
     is_team_valid = False
     
     while not is_team_valid: 
@@ -105,7 +113,7 @@ def select_and_validate_team_from_squad(df):
 
 def add_player_data_to_fpl_team_class(fpl_team, PlayerData, row):
     player_data = PlayerData(id=row.id, rank=row.rank, name=row.Index, element_type=row.element_type,
-                            score=row._26, cost=row.now_cost)
+                            score=row._26, cost=row.now_cost, team=row.team)
     if len(fpl_team.team) >= 11:
         fpl_team.bench.append(player_data)
     else:        
@@ -116,7 +124,10 @@ def add_player_data_to_fpl_team_class(fpl_team, PlayerData, row):
 def get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, position):
     position_data = req_data.loc[req_data["element_type"] == position]
     for row in position_data.itertuples():
+        team = row.team
+                
         name = row.Index
+        
         count = 0
         position_list = [player for player in fpl_team.team if player.element_type == position]
         position_list.extend(player for player in fpl_team.bench if player.element_type == position)
@@ -140,3 +151,4 @@ def get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_da
                     else:
                         # can't afford player
                         continue
+rank_current_squad()

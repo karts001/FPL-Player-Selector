@@ -55,7 +55,7 @@ df_fpl = pdm.convert_column_to_float(df_fpl, "form")
 df_fpl = pdm.convert_column_to_float(df_fpl, "ict_index")
 df_fpl["chance_of_playing_this_round"] = df_fpl["chance_of_playing_this_round"].fillna(100.0)
 
-df_fpl["FPL Weekly Score"] = ((0.1 * df_fpl["form"]) + (2 * df_fpl["One Match Probability"]) + (1.5 * df_fpl["Average Probability"]) + (0.1 * df_fpl["ict_index"]) + (0.01 * df_fpl["FPL_Metric"]) + ((df_fpl["chance_of_playing_this_round"]/100) -1) )
+df_fpl["FPL Weekly Score"] = ((0.1 * df_fpl["form"]) + (2 * df_fpl["One Match Probability"]) + (1.5 * df_fpl["Average Probability"]) + (0.1 * df_fpl["ict_index"]) + ((df_fpl["chance_of_playing_this_round"]/100) -1) )
 df_fpl.drop(df_fpl[df_fpl["FPL Weekly Score"] < 0].index, inplace=True)
 
 try:

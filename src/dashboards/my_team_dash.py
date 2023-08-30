@@ -11,8 +11,11 @@ df["Full Name"] = df.index
 
 app = Dash(__name__,
            requests_pathname_prefix="/my_team/")
+app.title = "My Current Team"
 
-app.layout = html.Div([dash_table.DataTable(
+app.layout = html.Div([
+    html.H1(children="My Team Dash", style={'textAlign':'center'}),
+    dash_table.DataTable(
     id="data-table",
     columns=[
         {"name": "Full Name", "id": "Full Name", "type": "text"},
@@ -21,7 +24,8 @@ app.layout = html.Div([dash_table.DataTable(
         {"name":"Chance of Playing This Round", "id":"chance_of_playing_this_round", "type": "numeric"},
         {"name": "Cost (£m)", "id": "now_cost", "type": "numeric"},
         {"name": "Position", "id":"element_type", "type": "numeric"},
-        {"name": "FPL Weekly Score", "id": "FPL Weekly Score", "type": "numeric"}],
+        {"name": "FPL Weekly Score", "id": "FPL Weekly Score", "type": "numeric"}
+        ],
     data=df.to_dict("records"),
     style_header={'textAlign': 'center'},
     sort_action="native",
