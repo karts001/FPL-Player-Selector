@@ -1,14 +1,14 @@
 from dash import Dash, html, dash_table, callback, Input, Output, dcc, ctx
 import pandas as pd
 
-from src.weekly_calculation.current_team import combined_transfers, transfer_list
+from src.weekly_calculation.current_team import combined_transfers, transfer_list, TransferData
 from src.css.styling import conditional_style, suggested_transfers_columns, external_stylesheets
 from src.common.team_conversion import int_to_string_map, position_mapper
 from src.weekly_calculation.player_weekly_score import calculate_player_score
 
 gameweek_transfers = combined_transfers()
-
 df = pd.DataFrame(gameweek_transfers)
+print(df.shape)
 df["team"] = df["team"].map(int_to_string_map)
 df["element_type"] = df["element_type"].map(position_mapper)
 
@@ -68,11 +68,10 @@ app.layout = html.Div([
 def update_table(n_clicks, value):
     triggered_id = ctx.triggered_id
     print(triggered_id)
-    # if triggered_id == "update-scores":
-    #     return update_weekly_score_calculation(n_clicks)
-    if triggered_id == "dropdown-selection":
-        return load_table(value)
-    
+    if triggered_id == "dropdown-selection" and value == 5:
+        return load_table(value, 1)
+    else:
+        return load_table(value, 3)
 
 def update_weekly_score_calculation(n_clicks):   
     if n_clicks == None:
@@ -93,14 +92,14 @@ def get_suggested_gameweek_transfers():
     
     return df
 
-def load_table(value):
+def load_table(value, players_in_list):
     if value == 5:
         gameweek_transfers = combined_transfers()
         df = pd.DataFrame(gameweek_transfers)
         df["team"] = df["team"].map(int_to_string_map)
         df["element_type"] = df["element_type"].map(position_mapper)
     else:
-        player_list = transfer_list(value)
+        player_list = transfer_list(value, players_in_list)
         df = pd.DataFrame(player_list) 
         df["team"] = df["team"].map(int_to_string_map)
         df["element_type"] = df["element_type"].map(position_mapper)

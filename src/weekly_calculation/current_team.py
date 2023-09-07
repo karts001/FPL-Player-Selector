@@ -25,13 +25,12 @@ SquadData = namedtuple("SquadData", ["fpl_team", "req_data", "team_frequency"])
 
 def combined_transfers():
     squad_data = select_best_team_from_current_squad()
-    goalkeeper = get_highest_ranked_player_not_in_squad_for_a_given_position(squad_data.fpl_team, squad_data.req_data, 1, squad_data.team_frequency)
-    defender = get_highest_ranked_player_not_in_squad_for_a_given_position(squad_data.fpl_team, squad_data.req_data, 2, squad_data.team_frequency)
-    midfielder = get_highest_ranked_player_not_in_squad_for_a_given_position(squad_data.fpl_team, squad_data.req_data, 3,squad_data.team_frequency)
-    attacker = get_highest_ranked_player_not_in_squad_for_a_given_position(squad_data.fpl_team, squad_data.req_data, 4, squad_data.team_frequency)
-    
-    PotentialTransfers = namedtuple("PotentialTransfers", ["goalkeeper", "defender", "midfielder", "attacker"])
-    potential_transfers = PotentialTransfers(goalkeeper, defender, midfielder, attacker)
+
+    goalkeeper = top_x_players_for_a_position(squad_data.req_data, 1, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+    defender = top_x_players_for_a_position(squad_data.req_data, 2, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+    midfielder = top_x_players_for_a_position(squad_data.req_data, 3, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+    attacker = top_x_players_for_a_position(squad_data.req_data, 4, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+    potential_transfers = [goalkeeper[0], defender[0], midfielder[0], attacker[0]]
     
     return potential_transfers
 
@@ -158,52 +157,6 @@ def add_player_data_to_fpl_team_class(fpl_team, PlayerData, row, team_or_bench):
         fpl_team.team.append(player_data)
     else:
         fpl_team.bench.append(player_data)
-    
-def get_highest_ranked_player_not_in_squad_for_a_given_position(fpl_team, req_data, position, team_frequency):
-    #TODO: Calculate expected team scores with suggested players
-    NewPlayerData = namedtuple("NewPlayerData", ["rank", "name", "element_type", "score", "cost", "team"])
-    alt_team = copy.deepcopy(fpl_team)
-    position_data = req_data.loc[req_data["element_type"] == position]
-    for row in position_data.iterrows():
-        data = get_desired_data_from_data_frame(row)
-        position_list = create_list_of_players_per_position(fpl_team, position)
-        
-        for player in position_list:
-            number_of_players_from_specific_team = team_frequency.get(row[1].team, 0)
-            if number_of_players_from_specific_team == 3:
-                #TODO: There will be cases where we want to replace this player with a player from their team.
-                # 3 players from team already
-                break
-            if player.name == data.name:
-            # player already in team
-                break
-            else:
-                balance = fpl.get_remaining_balance()        
-                if (position_list[-1].cost + balance) > row[1].now_cost: 
-                    try:
-                        alt_team.bench.remove(position_list[-1])
-                        player_data = NewPlayerData(row[1][1], row[0], row[1].element_type, row[1].fpl_weekly_score, 
-                                                 row[1].now_cost, row[1].team)
-                        alt_team.bench.append(player_data)
-                    except ValueError:
-                        alt_team.team.remove(position_list[-1])
-                        player_data = NewPlayerData(row[1][1], row[0], row[1].element_type, row[1].fpl_weekly_score, 
-                                                 row[1].now_cost, row[1].team)
-                        alt_team.team.append(player_data)
-                        
-                    alt_team.team = sorted(alt_team.team, key=attrgetter("score"))
-                    alt_team.bench = sorted(alt_team.bench, key=attrgetter("score"), reverse=True)
-                    alt_team.select_best_team()                       
-                    score_delta = round(row[1].fpl_weekly_score - position_list[-1].score, 3)
-                    #print(alt_team.team)
-                    
-                    transfer_data = TransferData(data.name, data.chance_of_playing,
-                                                 data.position, data.cost, data.team, data.rank,
-                                                 score_delta, position_list[-1].name, data.score)
-                    return transfer_data
-                else:
-                    # can't afford player
-                    continue
 
 def create_list_of_players_per_position(fpl_team, position):
     position_list = [player for player in fpl_team.team if player.element_type == position]
@@ -230,19 +183,21 @@ def get_desired_data_from_data_frame(row):
     
     return data
 
-def transfer_list(position):
+def transfer_list(position, no_of_players_in_list):
     squad_data = select_best_team_from_current_squad()
-    top_3_players = top_3_players_for_a_position(squad_data.req_data, position, squad_data.fpl_team, squad_data.team_frequency)
+    top_3_players = top_x_players_for_a_position(squad_data.req_data, position, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list)
     return top_3_players
 
-def top_3_players_for_a_position(req_data, position, fpl_team, team_frequency):
-    top_3_transfers_per_position = []
+def top_x_players_for_a_position(req_data, position, fpl_team, team_frequency, no_of_players_in_list):
+    #TODO: Calculate expected team scores with suggested players and add another column to dashboard with team score
+    # use deepcopy etc.
+    top_x_transfers_per_position = []
     position_data = req_data.loc[req_data["element_type"] == position]
     for row in position_data.iterrows():
         data = get_desired_data_from_data_frame(row)
         position_list = create_list_of_players_per_position(fpl_team, position)
-        if len(top_3_transfers_per_position) == 3:
-                return top_3_transfers_per_position
+        if len(top_x_transfers_per_position) == no_of_players_in_list:
+                return top_x_transfers_per_position
         number_of_players_from_specific_team = team_frequency.get(row[1].team, 0)
         if number_of_players_from_specific_team == 3:
             #TODO: There will be cases where we want to replace this player with a player from their team.
@@ -259,7 +214,7 @@ def top_3_players_for_a_position(req_data, position, fpl_team, team_frequency):
                                             data.position, data.cost, data.team, data.rank,
                                             score_delta, position_list[-1].name, data.score)
             
-            top_3_transfers_per_position.append(transfer_data)
+            top_x_transfers_per_position.append(transfer_data)
 
 def player_already_in_team(position_list, data):
     for player in position_list:
