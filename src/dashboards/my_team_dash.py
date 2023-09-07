@@ -1,36 +1,37 @@
-from dash import Dash, html, dcc, callback, Output, Input, dash_table
-import plotly.express as px
+from dash import Dash, html, dash_table
 
 from src.weekly_calculation import current_team
+from src.common.team_conversion import position_mapper
+from src.css.styling import conditional_style, my_team_columns, external_stylesheets
 
 list_of_player_ids = current_team.create_a_list_of_squad_ids()
 req_data = current_team.trim_df_columns()
 squad_data = current_team.get_squad_player_data(list_of_player_ids)
 df = current_team.convert_squad_data_list_into_df(squad_data, req_data)
 df["Full Name"] = df.index
+df["element_type"] = df["element_type"].map(position_mapper)
 
 app = Dash(__name__,
-           requests_pathname_prefix="/my_team/")
-app.title = "My Current Team"
-
+           requests_pathname_prefix="/my_team/",
+           external_stylesheets=external_stylesheets)
+app.title = "My Team"
 app.layout = html.Div([
+    html.Br(),
     html.H1(children="My Team Dash", style={'textAlign':'center'}),
-    dash_table.DataTable(
-    id="data-table",
-    columns=[
-        {"name": "Full Name", "id": "Full Name", "type": "text"},
-        {"name": "player id", "id": "id", "type": "numeric"},
-        {"name": "ict Index", "id":"ict_index", "type": "numeric"},
-        {"name":"Chance of Playing This Round", "id":"chance_of_playing_this_round", "type": "numeric"},
-        {"name": "Cost (£m)", "id": "now_cost", "type": "numeric"},
-        {"name": "Position", "id":"element_type", "type": "numeric"},
-        {"name": "FPL Weekly Score", "id": "FPL Weekly Score", "type": "numeric"}
-        ],
-    data=df.to_dict("records"),
-    style_header={'textAlign': 'center'},
-    sort_action="native",
-    sort_mode="multi"
-    )])
+    html.Br(),
+    html.Div([
+        dash_table.DataTable(
+            id="data-table",
+            columns=my_team_columns,
+            data=df.to_dict("records"),
+            style_data_conditional=conditional_style,
+            style_header={'textAlign': 'center', "backgroundColor": "black", "color": "white"},
+            sort_action="native",
+            sort_mode="multi"
+        )
+    ])
+])
+
 
 if __name__ == "__main__":
     app.run(debug=True)

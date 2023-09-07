@@ -29,7 +29,7 @@ def filter_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def convert_data_to_dataframe(file_path):
     df = pd.read_csv(file_path)
-    df["X-Rating"] = df["FPL Weekly Score"] / df["now_cost"]
+    df["X-Rating"] = df["fpl_weekly_score"] / df["now_cost"]
     
     return df
 

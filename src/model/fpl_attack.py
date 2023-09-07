@@ -1,4 +1,4 @@
-from model.fpl_team import BaseFPL
+from src.model.fpl_squad import BaseFPL
 
 class FPLAttack(BaseFPL):
     def __init__(self, star_players, budget):

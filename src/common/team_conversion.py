@@ -58,8 +58,15 @@ squad_element_map = {
     373: "Bruno Borges Fernandes",
     343: "Julián Álvarez",
     355: "Erling Haaland",
-    533: "Lukasz Fabianski",
+    520: "Guglielmo Vicario",
     405: "Sven Botman",
     109: "Ben Mee",
     85: "Dominic Solanke" 
+}
+
+position_mapper = {
+    1: "Goalkeeper",
+    2: "Defender",
+    3: "Midfielder",
+    4: "Attacker"
 }

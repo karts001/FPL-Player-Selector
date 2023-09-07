@@ -1,12 +1,12 @@
 import pandas as pd
 from os.path import dirname, join
 
-from model.fpl_attack import FPLAttack
-from model.fpl_midfield import FPLMidfield
-from model.fpl_defense import FPLDefender
-from model.fpl_goalkeeper import FPLGoalkeeper
+from src.model.fpl_attack import FPLAttack
+from src.model.fpl_midfield import FPLMidfield
+from src.model.fpl_defense import FPLDefender
+from src.model.fpl_goalkeeper import FPLGoalkeeper
 
-from common.fpl_get_endpoint import get_player_data_from_api
+from src.common.fpl_get_endpoint import get_player_data_from_api
 
 NUMBER_OF_PLAYERS_TO_SHORTLIST = 150
 MINIMUM_NUMBER_OF_MINUTES_PLAYED = 1500
