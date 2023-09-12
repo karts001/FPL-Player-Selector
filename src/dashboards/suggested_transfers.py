@@ -1,16 +1,13 @@
 from dash import Dash, html, dash_table, callback, Input, Output, dcc, ctx
 import pandas as pd
 
-from src.weekly_calculation.current_team import combined_transfers, transfer_list, TransferData
+from src.weekly_calculation.current_team import combined_transfers, transfer_list
 from src.css.styling import conditional_style, suggested_transfers_columns, external_stylesheets
 from src.common.team_conversion import int_to_string_map, position_mapper
 from src.weekly_calculation.player_weekly_score import calculate_player_score
 
-gameweek_transfers = combined_transfers()
-df = pd.DataFrame(gameweek_transfers)
-print(df.shape)
-df["team"] = df["team"].map(int_to_string_map)
-df["element_type"] = df["element_type"].map(position_mapper)
+#TODO: Either calculate new values, or take values from postgres database
+df = combined_transfers()
 
 app = Dash(__name__,
            requests_pathname_prefix="/suggested_transfers/",
@@ -51,7 +48,7 @@ app.layout = html.Div([
             id="data-table",
             data=df.to_dict("records"),
             columns=suggested_transfers_columns,
-            hidden_columns=["element_type"],
+            hidden_columns=["element_type", "gameweek"],
             style_header={'textAlign': 'center', "backgroundColor": "black", "color": "white"},
             style_data_conditional=conditional_style,
             sort_action="native",
@@ -60,49 +57,38 @@ app.layout = html.Div([
     ]),
 ])
 
-@callback(
+@app.callback(
     Output("data-table", "data"),
     Input("update-scores", "n_clicks"),
     Input("dropdown-selection", "value")
 )
 def update_table(n_clicks, value):
     triggered_id = ctx.triggered_id
-    print(triggered_id)
+    if triggered_id == "update-scores":
+        if check_if_combined_is_selected(value):
+            calculate_player_score()
+            return load_table(value, 1)
+        else:
+            calculate_player_score()
+            return load_table(value, 3)
+ 
     if triggered_id == "dropdown-selection" and value == 5:
         return load_table(value, 1)
     else:
         return load_table(value, 3)
-
-def update_weekly_score_calculation(n_clicks):   
-    if n_clicks == None:
-        df = get_suggested_gameweek_transfers()
-        return df.to_dict("records")
-    
-    if n_clicks > 0:
-        print("is the button working")
-        calculate_player_score()
-        df = get_suggested_gameweek_transfers()
-        return df.to_dict("records")
-    
-def get_suggested_gameweek_transfers():
-    new_potential_transfers = combined_transfers()
-    df = pd.DataFrame(new_potential_transfers)
-    df["team"] = df["team"].map(int_to_string_map)
-    df["element_type"] = df["element_type"].map(position_mapper)
-    
-    return df
+  
+def check_if_combined_is_selected(value):
+    if value == 5:
+        return True
+    else:
+        return False
 
 def load_table(value, players_in_list):
     if value == 5:
-        gameweek_transfers = combined_transfers()
-        df = pd.DataFrame(gameweek_transfers)
-        df["team"] = df["team"].map(int_to_string_map)
-        df["element_type"] = df["element_type"].map(position_mapper)
+        df = combined_transfers()
+
     else:
-        player_list = transfer_list(value, players_in_list)
-        df = pd.DataFrame(player_list) 
-        df["team"] = df["team"].map(int_to_string_map)
-        df["element_type"] = df["element_type"].map(position_mapper)
+        df = transfer_list(value, players_in_list)
     
     return df.to_dict("records")
 

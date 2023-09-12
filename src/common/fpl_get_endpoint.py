@@ -49,17 +49,6 @@ def get_player_data_from_api() -> list[dict]:
     
     return player_data
 
-def get_current_gameweek() -> int:
-    """Get the current gameweek from the response object
-
-    Returns:
-        int gameweek: The current gameweek
-    """
-    response = get_manager_response()
-    gameweek = response["started_event"]
-    
-    return gameweek
-
 def get_current_fpl_team() -> list:
     """Get current FPL team from endpoint
 
@@ -97,3 +86,19 @@ def get_remaining_balance() -> int:
     balance = transfers.get("bank")
     
     return balance / 10
+
+def get_current_gameweek():
+    response = get_base_response()
+    events = response["events"]
+    # check if current date is before deadline
+    # if it is break out of loop and take the gameweek
+    today = datetime.now()
+    iso_date = today.isoformat()
+    
+    for gameweek_data in events:
+        deadline = gameweek_data["deadline_time"]
+        if iso_date > deadline:
+           continue
+        else:
+            current_gameweek = gameweek_data["id"]
+            return current_gameweek

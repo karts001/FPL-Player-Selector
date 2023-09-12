@@ -23,6 +23,7 @@ def calculate_player_score():
     df_weekly_score = calcualte_fpl_weekly_score_and_add_to_data_frame(df_probabilities)
     # df_without_injured = drop_players_from_data_frame_who_have_50_percent_or_less_chance_of_playing_in_the_next_gameweek(df_weekly_score)
     sort_data_frame_by_fpl_weekly_score_and_save_to_a_csv_file(df_weekly_score) 
+    print("calculating new player scores!")
 
 def create_separate_columns_from_team_probability_class(team_probability):
     attribute_dict = {
