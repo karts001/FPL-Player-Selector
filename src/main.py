@@ -27,6 +27,8 @@ if __name__ == "__main__":
     
     
     
-#TODO: Unit tests for get fpl_get_endpoint
+#TODO: Create separate branch for unit tests
+#TODO: Create separate branch for adding proper landing page and navigation bar
+#TODO: Create separate branch for calculating team score for each suggested transfer
 #TODO: Make functions private by adding "_" prefix
 #TODO: Instead of creating CSV files for suggested transfers for each position use a Postgres database instead
