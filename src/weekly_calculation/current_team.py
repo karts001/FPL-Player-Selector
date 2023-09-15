@@ -11,18 +11,11 @@ import src.common.team_conversion as tc
 import src.file_paths as fp
 from src.model.fpl_team import FPLTeam
 from src.common.team_conversion import position_mapper, int_to_string_map
-from src.sql_app.database import engine, SessionLocal
+from src.sql_app.database import engine, get_db
 from src.sql_app.models import SuggestedAttackerTransfers, SuggestedCombinedTransfers, \
 SuggestedDefenderTransfers, SuggestedGoalkeeperTransfers, SuggestedMidfielderTransfers
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        
+      
 def get_gameweek_from_database(table=SuggestedCombinedTransfers):
     db = next(get_db())
     gameweek = db.query(table).first().gameweek
