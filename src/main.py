@@ -25,10 +25,8 @@ def root():
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
     
-    
-    
-#TODO: Create separate branch for unit tests
+
 #TODO: Create separate branch for adding proper landing page and navigation bar
 #TODO: Create separate branch for calculating team score for each suggested transfer
 #TODO: Make functions private by adding "_" prefix
-#TODO: Instead of creating CSV files for suggested transfers for each position use a Postgres database instead
+

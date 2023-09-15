@@ -3,10 +3,9 @@ import pandas as pd
 
 from src.weekly_calculation.current_team import combined_transfers, transfer_list
 from src.css.styling import conditional_style, suggested_transfers_columns, external_stylesheets
-from src.common.team_conversion import int_to_string_map, position_mapper
 from src.weekly_calculation.player_weekly_score import calculate_player_score
 
-#TODO: Either calculate new values, or take values from postgres database
+
 df = combined_transfers()
 
 app = Dash(__name__,

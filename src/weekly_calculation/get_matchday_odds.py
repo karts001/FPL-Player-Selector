@@ -1,8 +1,8 @@
 import requests
 from dotenv import load_dotenv
 import os
+from statistics import mean
 
-from src.common.team_conversion import string_to_int_map
 
 load_dotenv()
 PL_ODDS_API_KEY = os.getenv("PL_ODDS_API_KEY")
@@ -18,10 +18,8 @@ class TeamProbabilities:
         
     def calculate_average_probabilities(self):
         if len(self.probabilities) != 0:
-            average = sum(self.probabilities) / len(self.probabilities)
+            average = mean(self.probabilities)
             return average
-
-
 
 def get_matchday_odds() -> dict:
     """Get match day odds from odds-api
@@ -33,12 +31,12 @@ def get_matchday_odds() -> dict:
     response = requests.get(premier_league_odds_api).json()
 
     for fixture in response:
-        match_outcome = get_match_outcomes(fixture)
-        odds_dict = add_probabilities_to_dict(match_outcome)
+        match_outcome = _get_match_outcomes(fixture) 
+        odds_dict = _add_probabilities_to_dict(match_outcome)
         
     return odds_dict
 
-def convert_h2h_odds_to_probabilities(h2h_odds: float) -> float:
+def _convert_h2h_odds_to_probabilities(h2h_odds: float) -> float:
     """Convert head to head odds into probabilities
 
     Args:
@@ -50,7 +48,7 @@ def convert_h2h_odds_to_probabilities(h2h_odds: float) -> float:
     converted_odds = 1 / h2h_odds
     return converted_odds
 
-def get_match_outcomes(fixture: dict) -> list[dict]:
+def _get_match_outcomes(fixture: dict) -> list[dict]:
     """Get william hill odds for each match in the game week
 
     Args:
@@ -65,7 +63,7 @@ def get_match_outcomes(fixture: dict) -> list[dict]:
     
     return match_outcome
 
-def add_probabilities_to_dict(match_outcome: dict) -> dict:
+def _add_probabilities_to_dict(match_outcome: dict) -> dict:
     """Create a list containing all of the probabilities of each game in the game week
 
     Args:
@@ -77,8 +75,8 @@ def add_probabilities_to_dict(match_outcome: dict) -> dict:
 
     home_team_name = match_outcome[0]["name"]
     away_team_name = match_outcome[1]["name"]
-    home_probability = round(convert_h2h_odds_to_probabilities(match_outcome[0]["price"]), 3)
-    away_probability = round(convert_h2h_odds_to_probabilities(match_outcome[1]["price"]), 3)
+    home_probability = round(_convert_h2h_odds_to_probabilities(match_outcome[0]["price"]), 3)
+    away_probability = round(_convert_h2h_odds_to_probabilities(match_outcome[1]["price"]), 3)
     
     home_team = TeamProbabilities(home_team_name)
     away_team = TeamProbabilities(away_team_name)
@@ -107,8 +105,3 @@ def add_probabilities_to_dict(match_outcome: dict) -> dict:
     odds_dict.get(home_team_name).average_probabilities = odds_dict.get(home_team_name).calculate_average_probabilities()
     odds_dict.get(away_team_name).average_probabilities = odds_dict.get(away_team_name).calculate_average_probabilities()
     return odds_dict
-
-def get_probability_average(list_of_win_probabilities: list) -> int:
-    average_probability = sum(list_of_win_probabilities)/len(list_of_win_probabilities)
-    
-    return average_probability

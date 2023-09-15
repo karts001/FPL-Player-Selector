@@ -4,10 +4,10 @@ from src.weekly_calculation import current_team
 from src.common.team_conversion import position_mapper
 from src.css.styling import conditional_style, my_team_columns, external_stylesheets
 
-list_of_player_ids = current_team.create_a_list_of_squad_ids()
-req_data = current_team.trim_df_columns()
-squad_data = current_team.get_squad_player_data(list_of_player_ids)
-df = current_team.convert_squad_data_list_into_df(squad_data, req_data)
+list_of_player_ids = current_team._create_a_list_of_squad_ids()
+req_data = current_team._trim_df_columns()
+squad_data = current_team._get_squad_player_data(list_of_player_ids)
+df = current_team._convert_squad_data_list_into_df(squad_data, req_data)
 df["Full Name"] = df.index
 df["element_type"] = df["element_type"].map(position_mapper)
 

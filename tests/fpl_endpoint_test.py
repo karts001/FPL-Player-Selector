@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch
 from src.common import fpl_get_endpoint
 from datetime import datetime
@@ -38,11 +37,9 @@ def test_get_current_gameweek_returns_correct_gameweek(requests_mock):
             }
         ]
     }
-    print(fpl_get_endpoint.__name__)
     requests_mock.get("https://fantasy.premierleague.com/api/bootstrap-static/", json=fake_response)
     with patch(f"{fpl_get_endpoint.__name__}.datetime", wraps=datetime) as mock_date:
         mock_date.now.return_value = datetime(2023, 8, 15, 10, 27, 21, 240752)
-        # mock_date.side_effect = lambda *args, **kw: datetime.datetime.now(*args, **kw)
         gameweek = fpl_get_endpoint.get_current_gameweek()
         
         assert gameweek == 2

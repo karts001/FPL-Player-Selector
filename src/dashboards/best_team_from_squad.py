@@ -1,11 +1,11 @@
 import pandas as pd
 from dash import Dash, html, dash_table
 
-from src.weekly_calculation.current_team import select_best_team_from_current_squad
+from src.weekly_calculation.current_team import _select_best_team_from_current_squad
 from src.common.team_conversion import position_mapper, int_to_string_map
 from src.css.styling import best_eleven_columns, conditional_style, external_stylesheets
 
-squad_data = select_best_team_from_current_squad()
+squad_data = _select_best_team_from_current_squad()
 
 df = pd.DataFrame(squad_data.fpl_team.team)
 df["element_type"] = df["element_type"].map(position_mapper)
