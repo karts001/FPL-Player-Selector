@@ -51,7 +51,7 @@ squad_element_map = {
     131: "Pervis Estupiñán",
     430: "Kieran Trippier",
     29: "Benjamin White",
-    14: "Martin Ødegaard",
+    19: "Bukayo Saka",
     226: "Eberechi Eze",
     134: "Pascal Groß",
     365: "Rodrigo Hernandez",
@@ -59,7 +59,7 @@ squad_element_map = {
     343: "Julián Álvarez",
     355: "Erling Haaland",
     520: "Guglielmo Vicario",
-    405: "Sven Botman",
+    511: "Cristian Romero",
     109: "Ben Mee",
     85: "Dominic Solanke" 
 }

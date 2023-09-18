@@ -28,7 +28,6 @@ TransferData = namedtuple("TransferData", ["player_in", "chance_of_playing_next_
 SquadData = namedtuple("SquadData", ["fpl_team", "req_data", "team_frequency"])
 
 
-
 def combined_transfers():
     if current_gameweek == _get_gameweek_from_database():
         print("getting from database")
