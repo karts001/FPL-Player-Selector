@@ -16,6 +16,8 @@ def create_full_name_column_and_make_it_the_row_index(df: pd.DataFrame) -> pd.Da
     """
     df["Full Name"] = df["first_name"] + " " + df["second_name"]
     df = df.set_index("Full Name")
+    df.drop(["first_name", "second_name", "element_type", "team", "now_cost"], axis=1, inplace=True)
+    df["chance_of_playing_this_round"] = df["chance_of_playing_this_round"].fillna(100)
     
     return df
 
@@ -51,9 +53,9 @@ def convert_column_to_int(df, column_name):
 
 def convert_squad_data_into_a_dataframe(list_of_list) -> pd.DataFrame:
     df = pd.DataFrame.from_records(list_of_list)
-    stats_columns = df["stats"].apply(pd.Series)
-    df.drop(columns=["stats", "explain"], axis=1, inplace=True)
-    df = pd.concat([df, stats_columns], axis=1)
+    df = df[["element_type", "chance_of_playing_this_round", "now_cost",
+             "team", "first_name", "second_name", "id", "ict_index"]]
+    
     
     return df
 

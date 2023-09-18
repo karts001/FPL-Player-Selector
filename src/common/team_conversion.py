@@ -46,24 +46,6 @@ int_to_string_map = {
     20: "Wolverhampton Wanderers"    
 }
 
-squad_element_map = {
-    275: "Bernd Leno",
-    131: "Pervis Estupiñán",
-    430: "Kieran Trippier",
-    29: "Benjamin White",
-    19: "Bukayo Saka",
-    226: "Eberechi Eze",
-    134: "Pascal Groß",
-    365: "Rodrigo Hernandez",
-    373: "Bruno Borges Fernandes",
-    343: "Julián Álvarez",
-    355: "Erling Haaland",
-    520: "Guglielmo Vicario",
-    511: "Cristian Romero",
-    109: "Ben Mee",
-    85: "Dominic Solanke" 
-}
-
 position_mapper = {
     1: "Goalkeeper",
     2: "Defender",

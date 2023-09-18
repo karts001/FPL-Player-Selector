@@ -7,7 +7,6 @@ import pandas as pd
 
 import src.common.fpl_get_endpoint as fpl
 import src.common.pandas_methods as pdm
-import src.common.team_conversion as tc
 import src.file_paths as fp
 from src.model.fpl_team import FPLTeam
 from src.common.team_conversion import position_mapper, int_to_string_map
@@ -28,7 +27,14 @@ TransferData = namedtuple("TransferData", ["player_in", "chance_of_playing_next_
 SquadData = namedtuple("SquadData", ["fpl_team", "req_data", "team_frequency"])
 
 
-def combined_transfers():
+def combined_transfers() -> pd.DataFrame:
+    """
+    Get the best suggested transfer (based off FPL Weekly Score) for each position
+
+    Returns:
+        pd.DataFrame: Dataframe containing the best suggested transfer for each position. This dataframe is then displayed
+        on a dashboard using Plotly Dash
+    """
     if current_gameweek == _get_gameweek_from_database():
         print("getting from database")
         df = pd.read_sql("suggested-combined-transfers", con=engine)
@@ -45,7 +51,16 @@ def combined_transfers():
     
     return df
 
-def transfer_list(position, no_of_players_in_list):
+def transfer_list(position: int, no_of_players_in_list: int) -> pd.DataFrame:
+    """
+    Create a dataframe containing the top {no_of_players_in_list} suggested transfers for a given position
+    Args:
+        position (int): Position to create the list for
+        no_of_players_in_list (int): Number of suggested transfers to find
+
+    Returns:
+        pd.DataFrame: _description_
+    """
     if position == 1:
         table = SuggestedGoalkeeperTransfers
         table_name = "suggested-goalkeeper-transfers"
@@ -71,13 +86,29 @@ def transfer_list(position, no_of_players_in_list):
     
     return df
 
-def _get_gameweek_from_database(table=SuggestedCombinedTransfers):
+def _get_gameweek_from_database(table=SuggestedCombinedTransfers) -> int:
+    """
+    Get the gameweek currently held in the database
+    Args:
+        table (BaseTransfers, optional): The database to look for the gameweek
+        Defaults to SuggestedCombinedTransfers.
+
+    Returns:
+        int: Gamweek held in the selected database
+    """
     db = next(get_db())
     gameweek = db.query(table).first().gameweek
     
     return gameweek
 
-def _select_best_team_from_current_squad():
+def _select_best_team_from_current_squad() -> SquadData:
+    """
+    Select the best (valid) combination of 11 players from the current squad
+    Returns:
+        SquadData: fpl_team contains the current squad players and associated gameweek data.
+                   req_data contains the same gameweek data for the rest of the players
+                   team_frequency tracks the number of players from a certain team  
+    """
     list_of_player_ids = _create_a_list_of_squad_ids()
     req_data = _trim_df_columns()
     squad_data = _get_squad_player_data(list_of_player_ids)
@@ -90,59 +121,75 @@ def _select_best_team_from_current_squad():
     return squad_data
 
 # List of player's element number
-def _create_a_list_of_squad_ids(): 
+def _create_a_list_of_squad_ids() -> list: 
+    """
+    Create a list of the squad ids of the current fpl squad
+    Returns:
+        list: list of squad ids of the current fpl squad
+    """
     list_of_player_element = [fpl.get_current_fpl_team()[index]["element"] for index in range(15)]
     return list_of_player_element
 
 # Find the associated player data from player_weekly_score.csv
-def _trim_df_columns():
+def _trim_df_columns() -> pd.DataFrame:
+    """
+    Create a dataframe from the csv file for all the "elements" in fpl but also trim down the columns and reformat the
+    dataframe
+    Returns:
+        pd.DataFrame: _description_
+    """
     file_path = fp.get_player_weekly_score_csv_path()
     df_player_score = pdm.convert_data_to_dataframe(file_path)
     df_player_score = df_player_score.set_index("Full Name")
-    req_data = df_player_score.loc[:, ["fpl_weekly_score", "rank", "element_type", "chance_of_playing_this_round", "now_cost", "team"]]
+    df_player_score.rename(columns={"rank": "fpl_rank"}, inplace=True)
+    req_data = df_player_score.loc[:, ["fpl_weekly_score", "fpl_rank", "element_type", "chance_of_playing_this_round",
+                                       "now_cost", "team"]]
     
     return req_data
 
-def _get_squad_player_data(list_of_player_ids):
+# Get fpl stats for players in squad
+def _get_squad_player_data(list_of_player_ids: list) -> list:
+    """
+    Get data for each player in squad from the fpl api
+    Args:
+        list_of_player_ids list: list of player ids in current squad
 
-    # player_data = fpl.get_player_data_from_api()
-    response = requests.get(current_gameweek_data_endpoint).json()
-    squad_data = [response["elements"][element - 1] for element in list_of_player_ids]
+    Returns:
+        list: list of player data of players in current squad
+    """
+    players_in_id_order = fpl.sort_base_response_by_id()
+    squad_data = [players_in_id_order[element - 1] for element in list_of_player_ids]
     
     return squad_data
 
 # Clean the data and put it in a pandas dataframe
-def _convert_squad_data_list_into_df(squad_data, req_data):
-    
-    df = pdm.convert_squad_data_into_a_dataframe(squad_data)
-    df["Full Name"] = df["id"].map(tc.squad_element_map)
-    df = df.set_index("Full Name")
+def _convert_squad_data_list_into_df(squad_data: pd.DataFrame, req_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean the squad_data dataframe and concatenate with the req_data dataframe
+    Args:
+        squad_data (pd.DataFrame): Dataframe containing squad data
+        req_data (pd.DataFrame): Dataframe containing data on all players in fpl
 
+    Returns:
+        pd.DataFrame: Concatenated dataframe
+    """
+    df = pdm.convert_squad_data_into_a_dataframe(squad_data)
+    df = pdm.create_full_name_column_and_make_it_the_row_index(df)
     df = pdm.concatenate_dataframes(df, req_data)
     df = df.head(15)
-    df = pdm.convert_column_to_int(df, "rank")
-    df.sort_values(by=["rank"], ascending=True, inplace=True)
+    df.sort_values(by=["fpl_rank"], ascending=True, inplace=True)
     
     return df
 
-def _count_number_of_players_from_same_team(df):
+def _count_number_of_players_from_same_team(df) -> pd.Series:
     team_frequency = df["team"].value_counts()
     team_frequency.loc
     
     return team_frequency
-
-# def check_if_position_is_on_limit(fpl_team, position):
-    
-#     if position == 1 and fpl_team.goalkeepers == 1:
-#         return True
-#     if position == 2 and fpl_team.defenders == 3:
-#         return True
-#     if position == 3 and fpl_team.attackers == 1:
-#         return True
     
 def _select_and_validate_team_from_squad(df):
     fpl_team = FPLTeam()
-    PlayerData = namedtuple("PlayerData", ["id", "rank", "name", "element_type", "score", "cost", "team"])
+    PlayerData = namedtuple("PlayerData", ["id", "fpl_rank", "name", "element_type", "score", "cost", "team", "chance_of_playing_this_round"])
     goalkeepers = df.loc[df["element_type"] == 1]
     defenders = df.loc[df["element_type"] == 2]
     midfielders = df.loc[df["element_type"] == 3]
@@ -168,8 +215,9 @@ def _select_and_validate_team_from_squad(df):
     
 def _move_player_to_team(PlayerData, row, fpl_team):
 
-    player_data = PlayerData(id=row.id, rank=row[26], name=row.name, element_type=row.element_type,
-                            score=row.fpl_weekly_score, cost=row.now_cost, team=row.team)
+    player_data = PlayerData(id=row.id, fpl_rank=row.fpl_rank, name=row.name, element_type=row.element_type,
+                            score=row.fpl_weekly_score, cost=row.now_cost, team=row.team, 
+                            chance_of_playing_this_round=row.chance_of_playing_this_round)
     fpl_team.team.append(player_data)
     
 
@@ -193,8 +241,9 @@ def _select_top_3_defenders(df, PlayerData, fpl_team):
     return fpl_team, df_trimmed
     
 def _add_player_data_to_fpl_team_class(fpl_team, PlayerData, row, team_or_bench):
-    player_data = PlayerData(id=row[1].id, rank=row[1][26], name=row[0], element_type=row[1].element_type,
-                            score=row[1].fpl_weekly_score, cost=row[1].now_cost, team=row[1].team)
+    player_data = PlayerData(id=row[1].id, fpl_rank=row[1].fpl_rank, name=row[0], element_type=row[1].element_type,
+                            score=row[1].fpl_weekly_score, cost=row[1].now_cost, team=row[1].team,
+                            chance_of_playing_this_round=row[1].chance_of_playing_this_round)
     
     if team_or_bench == "team":
         fpl_team.team.append(player_data)
@@ -210,14 +259,14 @@ def _make_dataframe_readable(potential_transfers):
 def _create_list_of_players_per_position(fpl_team, position):
     position_list = [player for player in fpl_team.team if player.element_type == position]
     position_list.extend(player for player in fpl_team.bench if player.element_type == position)
-    position_list.sort(key=attrgetter("rank"))
+    position_list.sort(key=attrgetter("fpl_rank"))
     
     return position_list
 
 def _get_desired_data_from_data_frame(row):
     DataFrameData = namedtuple("DataFrameData", ["name", "position",
                                                              "chance_of_playing", "cost",
-                                                             "team", "rank",
+                                                             "team", "fpl_rank",
                                                              "score"])
     
     name = row[0]
@@ -225,26 +274,22 @@ def _get_desired_data_from_data_frame(row):
     chance_of_playing = row[1].chance_of_playing_this_round
     cost = row[1].now_cost
     team = row[1].team
-    rank = row[1][1]
+    fpl_rank = row[1].fpl_rank
     score = round(row[1].fpl_weekly_score, 3)
     
-    data = DataFrameData(name, position, chance_of_playing, cost, team, rank, score)
+    data = DataFrameData(name, position, chance_of_playing, cost, team, fpl_rank, score)
     
     return data
 
 def _update_database(df, position):
     #TODO: save to a database instead (postgres)
     if position == 1:
-        # df.to_csv("src/csv_files/goalkeeper_transfers.csv")
         df.to_sql(name="suggested-goalkeeper-transfers", con=engine, if_exists="replace")
     if position == 2:
-        # df.to_csv("src/csv_files/defender_transfers.csv")
         df.to_sql(name="suggested-defender-transfers", con=engine, if_exists="replace")
     if position == 3:
-        # df.to_csv("src/csv_files/midfielder_transfers.csv")
         df.to_sql(name="suggested-midfielder-transfers", con=engine, if_exists="replace")
     if position == 4:
-        # df.to_csv("src/csv_files/attacker_transfers.csv")
         df.to_sql(name="suggested-attacker-transfers", con=engine, if_exists="replace")
 
 def _top_x_players_for_a_position(req_data, position, fpl_team, team_frequency, no_of_players_in_list):
@@ -270,7 +315,7 @@ def _top_x_players_for_a_position(req_data, position, fpl_team, team_frequency, 
         if (position_list[-1].cost + balance) > row[1].now_cost:
             score_delta = round(row[1].fpl_weekly_score - position_list[-1].score, 3)
             transfer_data = TransferData(data.name, data.chance_of_playing,
-                                            data.position, data.cost, data.team, data.rank,
+                                            data.position, data.cost, data.team, data.fpl_rank,
                                             score_delta, position_list[-1].name, data.score, fpl.get_current_gameweek())
             
             top_x_transfers_per_position.append(transfer_data)
