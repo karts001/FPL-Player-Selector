@@ -3,7 +3,7 @@ from fastapi.middleware.wsgi import WSGIMiddleware
 import uvicorn
 from fastapi.templating import Jinja2Templates
 
-from dashboards.fpl_player_score_plot import app as player_score_graph_mware
+from src.dashboards.fpl_player_score_plot import app as player_score_graph_mware
 from src.dashboards.my_team_dash import app as my_squad_mware
 from src.dashboards.suggested_transfers import app as suggested_transfers_mware
 from src.dashboards.best_team_from_squad import app as best_xi_mware

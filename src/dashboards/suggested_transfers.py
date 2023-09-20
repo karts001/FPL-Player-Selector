@@ -90,25 +90,25 @@ app.layout = html.Div(
 def update_table(n_clicks, value):
     triggered_id = ctx.triggered_id
     if triggered_id == "update-scores":
-        if check_if_combined_is_selected(value):
+        if _check_if_combined_is_selected(value):
             calculate_player_score()
-            return load_table(value, 1)
+            return _load_table(value, 1)
         else:
             calculate_player_score()
-            return load_table(value, 3)
+            return _load_table(value, 3)
  
     if triggered_id == "dropdown-selection" and value == 5:
-        return load_table(value, 1)
+        return _load_table(value, 1)
     else:
-        return load_table(value, 3)
+        return _load_table(value, 3)
   
-def check_if_combined_is_selected(value):
+def _check_if_combined_is_selected(value):
     if value == 5:
         return True
     else:
         return False
 
-def load_table(value, players_in_list):
+def _load_table(value, players_in_list):
     if value == 5:
         df = combined_transfers()
 

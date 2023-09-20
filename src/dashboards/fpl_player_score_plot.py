@@ -10,9 +10,6 @@ from src.config.route_names import fpl_player_score_plot, best_xi, my_squad
 file_path = get_player_weekly_score_csv_path()
 df = pdm.convert_data_to_dataframe(file_path)
 
-#TODO: Rename endpoint to something more specific / suitable
-#TODO: Add a navigation bar at the top to change between the three endpoints
-
 def create_buttons(btn1, btn2, btn3):
     button_html = html.Div(
             [
