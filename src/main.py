@@ -29,8 +29,8 @@ def root(request: Request):
                                                                    "player_score_plot": fpl_player_score_plot})
     
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="127.0.0.1", port=8000)
     
 
 #TODO: Create separate branch for adding proper landing page and navigation bar

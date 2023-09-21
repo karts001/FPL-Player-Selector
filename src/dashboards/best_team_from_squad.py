@@ -23,8 +23,8 @@ def create_buttons(btn1, btn2, btn3):
                            className="fpl-player-score-plot", style={"margin-left": "5px",
                                                                    "margin-top": "5px"},
                            href=f"../{btn2}", external_link=True),
-                dbc.Button("Best XI", color="primary", size="lg",
-                           className="best-xi", style={"margin-left": "5px",
+                dbc.Button("Suggested Transfers", color="primary", size="lg",
+                           className="suggested-transfers", style={"margin-left": "5px",
                                                        "margin-right": "5px",
                                                        "margin-top": "5px"}, href=f"../{btn3}",
                            external_link=True),
@@ -35,7 +35,7 @@ def create_buttons(btn1, btn2, btn3):
     
     return button_html
 
-buttons = create_buttons(my_squad, fpl_player_score_plot, best_xi)
+buttons = create_buttons(my_squad, fpl_player_score_plot, suggested_transfers)
 app = Dash(__name__,
            requests_pathname_prefix=f"/{best_xi}/",
            external_stylesheets=external_stylesheets)

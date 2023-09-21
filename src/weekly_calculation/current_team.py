@@ -96,9 +96,12 @@ def _get_gameweek_from_database(table=SuggestedCombinedTransfers) -> int:
     Returns:
         int: Gamweek held in the selected database
     """
-    db = next(get_db())
-    gameweek = db.query(table).first().gameweek
+    try:
+        db = next(get_db())
+        gameweek = db.query(table).first().gameweek
     
+    except AttributeError:
+        gameweek = 0
     return gameweek
 
 def _select_best_team_from_current_squad() -> SquadData:

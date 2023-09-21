@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from src.file_paths import get_player_weekly_score_csv_path
 import src.common.pandas_methods as pdm
 from src.css.styling import external_stylesheets
-from src.config.route_names import fpl_player_score_plot, best_xi, my_squad
+from src.config.route_names import fpl_player_score_plot, best_xi, my_squad, suggested_transfers
 
 file_path = get_player_weekly_score_csv_path()
 df = pdm.convert_data_to_dataframe(file_path)
@@ -16,8 +16,8 @@ def create_buttons(btn1, btn2, btn3):
                 dbc.Button("My Squad", color="primary", size="lg",
                            className="my-squad", href=f"../{btn1}/", external_link=True,
                            style={"margin-top": "5px"}),
-                dbc.Button("FPL Player Score Plot", color="primary", size="lg",
-                           className="fpl-player-score-plot", style={"margin-left": "5px",
+                dbc.Button("Suggested Transfers", color="primary", size="lg",
+                           className="suggested-transfers", style={"margin-left": "5px",
                                                                    "margin-top": "5px"},
                            href=f"../{btn2}", external_link=True),
                 dbc.Button("Best XI", color="primary", size="lg",
@@ -32,7 +32,7 @@ def create_buttons(btn1, btn2, btn3):
     
     return button_html
 
-buttons = create_buttons(my_squad, fpl_player_score_plot, best_xi)
+buttons = create_buttons(my_squad, suggested_transfers, best_xi)
 app = Dash(__name__,
            requests_pathname_prefix=f"/{fpl_player_score_plot}/",
            external_stylesheets=external_stylesheets)

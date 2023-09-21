@@ -16,8 +16,8 @@ df["element_type"] = df["element_type"].map(position_mapper)
 def create_buttons(btn1, btn2, btn3):
     button_html = html.Div(
             [
-                dbc.Button("My Squad", color="primary", size="lg",
-                           className="my-squad", href=f"../{btn1}/", external_link=True,
+                dbc.Button("Suggested Transfers", color="primary", size="lg",
+                           className="suggested-transfers", href=f"../{btn1}/", external_link=True,
                            style={"margin-top": "5px"}),
                 dbc.Button("FPL Player Score Plot", color="primary", size="lg",
                            className="fpl-player-score-plot", style={"margin-left": "5px",
@@ -34,7 +34,7 @@ def create_buttons(btn1, btn2, btn3):
         )
     return button_html
 
-buttons = create_buttons(my_squad, fpl_player_score_plot, best_xi)
+buttons = create_buttons(suggested_transfers, fpl_player_score_plot, best_xi)
 app = Dash(__name__,
            requests_pathname_prefix=f"/{my_squad}/",
            external_stylesheets=external_stylesheets)
