@@ -1,6 +1,5 @@
 """Get current team from FPL"""
 
-import requests
 from collections import namedtuple
 from operator import attrgetter
 import pandas as pd

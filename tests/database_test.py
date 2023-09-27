@@ -13,7 +13,7 @@ from src.main import app
 load_dotenv()
 username = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
-db_name= os.getenv("TEST_DB_NAME")
+db_name= os.getenv("DB_NAME")
 db_host = os.getenv("DB_HOST")
 db_port = os.getenv("DB_PORT")
 
