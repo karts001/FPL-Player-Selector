@@ -4,7 +4,7 @@ from os.path import dirname, join
 def get_filtered_players_csv_path():
     filtered_players_file = "filtered_players.csv"
     current_dir = dirname(__file__)
-    full_path = join(current_dir, "csv_files", filtered_players_file)
+    full_path = join(current_dir, filtered_players_file)
     
     return full_path
 

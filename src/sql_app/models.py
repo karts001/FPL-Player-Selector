@@ -8,7 +8,7 @@ class BaseTransfer(Base):
     index = Column(Integer, primary_key=True, index=True)
     player_in = Column(String, unique=True)
     player_out = Column(String, index=True)
-    chance_of_playing_next_round = Column(Integer)
+    chance_of_playing_this_round = Column(Integer)
     cost = Column(Float)
     team = Column(Integer)
     rank = Column(Integer, unique=True)

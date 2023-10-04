@@ -1,24 +1,21 @@
-from dash import Dash, html, dash_table
+from dash import Dash, html, dash_table, Output, Input
 import dash_bootstrap_components as dbc
 
-from src.weekly_calculation import current_team
+from src.weekly_calculation import current_team, player_weekly_score
 from src.common.team_conversion import position_mapper
 from src.css.styling import conditional_style, my_team_columns, external_stylesheets
 from src.config.route_names import fpl_player_score_plot, best_xi, suggested_transfers, my_squad
 
-list_of_player_ids = current_team._create_a_list_of_squad_ids()
-req_data = current_team._trim_df_columns()
-squad_data = current_team._get_squad_player_data(list_of_player_ids)
-df = current_team._convert_squad_data_list_into_df(squad_data, req_data)
-df["Full Name"] = df.index
-df["element_type"] = df["element_type"].map(position_mapper)
+
+df = current_team.get_current_team()
 
 def create_buttons(btn1, btn2, btn3):
     button_html = html.Div(
             [
                 dbc.Button("Suggested Transfers", color="primary", size="lg",
                            className="suggested-transfers", href=f"../{btn1}/", external_link=True,
-                           style={"margin-top": "5px"}),
+                           style={"margin-top": "5px",
+                                  "margin-left": "5px"}),
                 dbc.Button("FPL Player Score Plot", color="primary", size="lg",
                            className="fpl-player-score-plot", style={"margin-left": "5px",
                                                                    "margin-top": "5px"},
@@ -57,7 +54,7 @@ app.layout = html.Div(
             )
         ])
     ])
-
+    
 
 if __name__ == "__main__":
     app.run(debug=True)

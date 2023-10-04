@@ -3,8 +3,6 @@ version: "3.8"
 services:
   database:
     image: postgres
-    ports:
-      - 5432:5432
     restart: always
     environment:
       POSTGRES_USER: shiva
@@ -27,4 +25,3 @@ services:
 
 networks:
   default:
-    name: default-network

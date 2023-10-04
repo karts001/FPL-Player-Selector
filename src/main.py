@@ -27,13 +27,5 @@ def root(request: Request):
                                                                    "suggested_transfers": suggested_transfers,
                                                                    "my_squad": my_squad,
                                                                    "player_score_plot": fpl_player_score_plot})
-    
 
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="127.0.0.1", port=8000)
-    
-
-#TODO: Create separate branch for adding proper landing page and navigation bar
 #TODO: Create separate branch for calculating team score for each suggested transfer
-#TODO: Make functions private by adding "_" prefix
-

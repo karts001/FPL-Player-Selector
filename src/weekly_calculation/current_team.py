@@ -13,17 +13,16 @@ from src.sql_app.database import engine, get_db
 from src.sql_app.models import SuggestedAttackerTransfers, SuggestedCombinedTransfers, \
 SuggestedDefenderTransfers, SuggestedGoalkeeperTransfers, SuggestedMidfielderTransfers
 
-
-current_gameweek = fpl.get_current_gameweek()
-current_gameweek_data_endpoint = f"https://fantasy.premierleague.com/api/event/{current_gameweek-1}/live/"
+current_gameweek_m1 = fpl.get_current_gameweek() - 1
+current_gameweek_data_endpoint = f"https://fantasy.premierleague.com/api/event/{current_gameweek_m1}/live/"
 
 """Create a dataframe which contains my team and their fpl weekly score"""
 
-TransferData = namedtuple("TransferData", ["player_in", "chance_of_playing_next_round",
+TransferData = namedtuple("TransferData", ["player_in", "chance_of_playing_this_round",
                             "element_type", "cost", "team", "rank",
                             "score_delta", "player_out", "fpl_weekly_score", "gameweek"])
 
-SquadData = namedtuple("SquadData", ["fpl_team", "req_data", "team_frequency"])
+SquadData = namedtuple("SquadData", ["fpl_team", "df_pop", "team_frequency"])
 
 
 def combined_transfers() -> pd.DataFrame:
@@ -34,16 +33,15 @@ def combined_transfers() -> pd.DataFrame:
         pd.DataFrame: Dataframe containing the best suggested transfer for each position. This dataframe is then displayed
         on a dashboard using Plotly Dash
     """
-    if current_gameweek == _get_gameweek_from_database():
-        print("getting from database")
-        df = pd.read_sql("suggested-combined-transfers", con=engine)
+    if fpl.get_current_gameweek() == _get_gameweek_from_database():
+        df = read_from_db()
     else:  
         print("recalculating values")     
         squad_data = _select_best_team_from_current_squad()
-        goalkeeper = _top_x_players_for_a_position(squad_data.req_data, 1, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
-        defender = _top_x_players_for_a_position(squad_data.req_data, 2, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
-        midfielder = _top_x_players_for_a_position(squad_data.req_data, 3, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
-        attacker = _top_x_players_for_a_position(squad_data.req_data, 4, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+        goalkeeper = _top_x_players_for_a_position(squad_data.df_pop, 1, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+        defender = _top_x_players_for_a_position(squad_data.df_pop, 2, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+        midfielder = _top_x_players_for_a_position(squad_data.df_pop, 3, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
+        attacker = _top_x_players_for_a_position(squad_data.df_pop, 4, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list=1)
         potential_transfers = [goalkeeper[0], defender[0], midfielder[0], attacker[0]]
         df = _make_dataframe_readable(potential_transfers)
         df.to_sql(name="suggested-combined-transfers", con=engine, if_exists="replace") 
@@ -73,15 +71,21 @@ def transfer_list(position: int, no_of_players_in_list: int) -> pd.DataFrame:
         table = SuggestedAttackerTransfers
         table_name = "suggested-attacker-transfers"
         
-    if current_gameweek == _get_gameweek_from_database(table):
+    if fpl.get_current_gameweek() == _get_gameweek_from_database(table):
         print("getting from database")
         df = pd.read_sql(table_name, con=engine)
     else:
         print("recalculating values")
         squad_data = _select_best_team_from_current_squad()
-        top_3_players = _top_x_players_for_a_position(squad_data.req_data, position, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list)
+        top_3_players = _top_x_players_for_a_position(squad_data.df_pop, position, squad_data.fpl_team, squad_data.team_frequency, no_of_players_in_list)
         df = _make_dataframe_readable(top_3_players)
         _update_database(df, position)
+    
+    return df
+
+def read_from_db():
+    print("getting from database")
+    df = pd.read_sql("suggested-combined-transfers", con=engine)
     
     return df
 
@@ -112,13 +116,16 @@ def _select_best_team_from_current_squad() -> SquadData:
                    team_frequency tracks the number of players from a certain team  
     """
     list_of_player_ids = _create_a_list_of_squad_ids()
-    req_data = _trim_df_columns()
+    req_data = _trim_df_columns(True)
     squad_data = _get_squad_player_data(list_of_player_ids)
-    df = _convert_squad_data_list_into_df(squad_data, req_data)
-    team_frequency = _count_number_of_players_from_same_team(df)
-    fpl_team = _select_and_validate_team_from_squad(df)
+    player_population_data = something()
+    df_pop = _convert_squad_data_list_into_df(player_population_data, req_data)
+    df_squad = _convert_squad_data_list_into_df(squad_data, req_data).head(15)
+    df_squad.sort_values(by=["fpl_rank"], ascending=True, inplace=True)
+    team_frequency = _count_number_of_players_from_same_team(df_squad)
+    fpl_team = _select_and_validate_team_from_squad(df_squad)
     
-    squad_data = SquadData(fpl_team, req_data, team_frequency)
+    squad_data = SquadData(fpl_team, df_pop, team_frequency)
     
     return squad_data
 
@@ -133,7 +140,7 @@ def _create_a_list_of_squad_ids() -> list:
     return list_of_player_element
 
 # Find the associated player data from player_weekly_score.csv
-def _trim_df_columns() -> pd.DataFrame:
+def _trim_df_columns(include_coptr_col: bool) -> pd.DataFrame:
     """
     Create a dataframe from the csv file for all the "elements" in fpl but also trim down the columns and reformat the
     dataframe
@@ -144,8 +151,11 @@ def _trim_df_columns() -> pd.DataFrame:
     df_player_score = pdm.convert_data_to_dataframe(file_path)
     df_player_score = df_player_score.set_index("Full Name")
     df_player_score.rename(columns={"rank": "fpl_rank"}, inplace=True)
-    req_data = df_player_score.loc[:, ["fpl_weekly_score", "fpl_rank", "element_type", "chance_of_playing_this_round",
-                                       "now_cost", "team"]]
+
+    if include_coptr_col:
+        req_data = df_player_score.loc[:, ["fpl_weekly_score", "fpl_rank"]]
+    else:
+        req_data = df_player_score.loc[:, ["fpl_weekly_score", "fpl_rank"]]
     
     return req_data
 
@@ -164,8 +174,21 @@ def _get_squad_player_data(list_of_player_ids: list) -> list:
     
     return squad_data
 
+def something() -> list:
+    """
+    Get data for each player in squad from the fpl api
+    Args:
+        list_of_player_ids list: list of player ids in current squad
+
+    Returns:
+        list: list of player data of players in current squad
+    """
+    players_in_id_order = fpl.sort_base_response_by_id()
+    
+    return players_in_id_order
+
 # Clean the data and put it in a pandas dataframe
-def _convert_squad_data_list_into_df(squad_data: pd.DataFrame, req_data: pd.DataFrame) -> pd.DataFrame:
+def _convert_squad_data_list_into_df(squad_data: list, req_data: pd.DataFrame) -> pd.DataFrame:
     """
     Clean the squad_data dataframe and concatenate with the req_data dataframe
     Args:
@@ -175,12 +198,13 @@ def _convert_squad_data_list_into_df(squad_data: pd.DataFrame, req_data: pd.Data
     Returns:
         pd.DataFrame: Concatenated dataframe
     """
+    
     df = pdm.convert_squad_data_into_a_dataframe(squad_data)
     df = pdm.create_full_name_column_and_make_it_the_row_index(df)
+    df.drop(["first_name", "second_name"], axis=1, inplace=True)
     df = pdm.concatenate_dataframes(df, req_data)
-    df = df.head(15)
-    df.sort_values(by=["fpl_rank"], ascending=True, inplace=True)
-    
+    df["now_cost"] = df["now_cost"] / 10
+        
     return df
 
 def _count_number_of_players_from_same_team(df) -> pd.Series:
@@ -299,6 +323,7 @@ def _top_x_players_for_a_position(req_data, position, fpl_team, team_frequency, 
     # use deepcopy etc.
     top_x_transfers_per_position = []
     position_data = req_data.loc[req_data["element_type"] == position]
+    position_data.sort_values(by="fpl_weekly_score", ascending=False, inplace=True)
     for row in position_data.iterrows():
         data = _get_desired_data_from_data_frame(row)
         position_list = _create_list_of_players_per_position(fpl_team, position)
@@ -315,11 +340,13 @@ def _top_x_players_for_a_position(req_data, position, fpl_team, team_frequency, 
         
         balance = fpl.get_remaining_balance()        
         if (position_list[-1].cost + balance) > row[1].now_cost:
+            data.name
             score_delta = round(row[1].fpl_weekly_score - position_list[-1].score, 3)
+            # if score_delta > 0:
             transfer_data = TransferData(data.name, data.chance_of_playing,
                                             data.position, data.cost, data.team, data.fpl_rank,
                                             score_delta, position_list[-1].name, data.score, fpl.get_current_gameweek())
-            
+             
             top_x_transfers_per_position.append(transfer_data)
 
 def _player_already_in_team(position_list, data):
@@ -329,3 +356,24 @@ def _player_already_in_team(position_list, data):
         else:
             continue
     return False
+
+def get_current_team():
+    list_of_player_ids = _create_a_list_of_squad_ids()
+    req_data = _trim_df_columns(False)
+    df = convert_api_data_to_data_frame(list_of_player_ids, req_data)
+    df = df.head(15)
+    df.sort_values(by=["fpl_rank"], ascending=True, inplace=True)
+    df["chance_of_playing_this_round"] = df["chance_of_playing_this_round"].fillna(df["chance_of_playing_next_round"])
+    df["chance_of_playing_this_round"] = df["chance_of_playing_this_round"].fillna(100.0)
+    df["Full Name"] = df.index
+    df["element_type"] = df["element_type"].map(position_mapper)
+    df.loc[df["status"] == "i", ["fpl_weekly_score", "chance_of_playing_this_round"]] = 0.0
+    df.loc[df["status"] == "s", ["fpl_weekly_score", "chance_of_playing_this_round"]] = 0.0
+    
+    return df
+
+def convert_api_data_to_data_frame(list_of_player_ids: list, req_data: pd.DataFrame):
+    squad_data = _get_squad_player_data(list_of_player_ids)
+    df = _convert_squad_data_list_into_df(squad_data, req_data)  
+    
+    return df
