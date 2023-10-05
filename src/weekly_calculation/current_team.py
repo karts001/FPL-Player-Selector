@@ -322,7 +322,7 @@ def _top_x_players_for_a_position(req_data, position, fpl_team, team_frequency, 
     #TODO: Calculate expected team scores with suggested players and add another column to dashboard with team score
     # use deepcopy etc.
     top_x_transfers_per_position = []
-    position_data = req_data.loc[req_data["element_type"] == position]
+    position_data = req_data.loc[req_data["element_type"] == position].copy()
     position_data.sort_values(by="fpl_weekly_score", ascending=False, inplace=True)
     for row in position_data.iterrows():
         data = _get_desired_data_from_data_frame(row)
