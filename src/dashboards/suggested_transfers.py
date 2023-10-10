@@ -92,15 +92,15 @@ def update_table(n_clicks, value):
     if triggered_id == "update-scores":
         if _check_if_combined_is_selected(value):
             calculate_player_score()
-            return _load_table(value, 1)
+            return _load_table(value)
         else:
             calculate_player_score()
-            return _load_table(value, 3)
+            return _load_table(value)
  
     if triggered_id == "dropdown-selection" and value == 5:
-        return _load_table(value, 1)
+        return _load_table(value)
     else:
-        return _load_table(value, 3)
+        return _load_table(value)
   
 def _check_if_combined_is_selected(value):
     if value == 5:
@@ -108,12 +108,12 @@ def _check_if_combined_is_selected(value):
     else:
         return False
 
-def _load_table(value, players_in_list):
+def _load_table(value):
     if value == 5:
         df = combined_transfers()
 
     else:
-        df = transfer_list(value, players_in_list)
+        df = transfer_list(value)
     
     return df.to_dict("records")
 

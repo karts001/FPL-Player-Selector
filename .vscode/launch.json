@@ -8,11 +8,19 @@
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
+            "module": "com.docker.devenvironments.code",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Module",
+            "type": "python",
+            "request": "launch",
             // "module": "enter-your-module-name",
             "justMyCode": true,
             "cwd": "${fileDirname}",
-            "purpose": ["debug-in-terminal"]
+            "purpose": [
+                "debug-in-terminal"
+            ]
         }
     ],
-    
 }
